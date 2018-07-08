@@ -38,7 +38,7 @@ context(class {
           PostCSSPlugin(postCssConfig.plugins),
           CSSResourcePlugin({
             dist: 'dist',
-            resolve: (f) => f,
+            resolve: (f) => `/${f}`,
           }),
           CSSPlugin()
         ],
