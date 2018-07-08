@@ -1,6 +1,7 @@
 const {
   FuseBox,
   WebIndexPlugin,
+  SVGPlugin,
   SassPlugin,
   PostCSSPlugin,
   CSSResourcePlugin,
@@ -34,10 +35,14 @@ context(class {
       plugins: [
         [
           SassPlugin(),
-          CSSResourcePlugin(),
           PostCSSPlugin(postCssConfig.plugins),
+          CSSResourcePlugin({
+            dist: 'dist',
+            resolve: (f) => f,
+          }),
           CSSPlugin()
         ],
+        SVGPlugin(),
         WebIndexPlugin({
           template : 'src/index.html',
         }),
