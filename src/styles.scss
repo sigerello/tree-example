@@ -1,0 +1,44 @@
+
+#root {
+  padding: 2rem;
+
+  .app {
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+    width: 100%;
+
+    .tree {
+      padding: 1rem;
+      width: 50%;
+
+      .node {
+        .node-name {
+          cursor: pointer;
+        }
+        .node-children {
+          margin-left: 1rem;
+        }
+      }
+    }
+
+    .debug {
+      padding: 1rem;
+      width: 50%;
+      border: 1px dashed #ccc;
+
+      span {
+        font-weight: 600;
+        color: #444;
+      }
+
+      .dump {
+        border: 1px dashed #ccc;
+        background-color: #efefef;
+        padding: 1rem;
+        white-space: pre;
+        overflow: scroll;
+      }
+    }
+  }
+}

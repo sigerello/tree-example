@@ -1,0 +1,27 @@
+{
+  "name": "tree",
+  "version": "1.0.0",
+  "description": "Tree",
+  "scripts": {
+    "dev": "node fuse build:dev",
+    "prod": "node fuse build:prod"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/react": "^16.4.6",
+    "@types/react-dom": "^16.0.6",
+    "autoprefixer": "^8.6.5",
+    "fuse-box": "^3.3.0",
+    "opn": "^5.3.0",
+    "portfinder": "^1.0.13",
+    "postcss-flexbugs-fixes": "^3.3.1",
+    "react": "^16.4.1",
+    "react-dom": "^16.4.1",
+    "tslib": "^1.9.3",
+    "typescript": "^2.9.2",
+    "uglify-js": "^3.4.3"
+  }
+}
