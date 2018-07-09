@@ -1,55 +1,67 @@
 const {
   FuseBox,
   WebIndexPlugin,
-  SVGPlugin,
+  // SVGPlugin,
   SassPlugin,
   PostCSSPlugin,
-  CSSResourcePlugin,
+  // CSSResourcePlugin,
   CSSPlugin,
   ReplacePlugin,
   QuantumPlugin
 } = require('fuse-box')
+// const {YAMLPlugin} = require('fuse-box-yaml')
 const {src, task, exec, context} = require('fuse-box/sparky')
+const minimist = require('minimist')
 const portfinder = require('portfinder')
 const postCssConfig = require('./postcss.config')
 
 portfinder.basePort = 4444
 
-if (!process.env.NODE_ENV) {
-  process.env.NODE_ENV = 'development'
-}
+///////////////////////////////////////////////////////////////////////////////
 
 context(class {
-  isProduction() {
-    return process.env.NODE_ENV === 'production'
+  constructor() {
+    this.parseOptions()
   }
 
-  getConfig() {
+  parseOptions() {
+    const argv = minimist(process.argv.slice(2))
+
+    this.prod = argv['prod'] === true
+
+    process.env.NODE_ENV = this.prod ? 'production' : 'development'
+
+    console.log('---> ctx', this)
+    console.log('--------------------------\n')
+  }
+
+  getBundleConfig() {
     return FuseBox.init({
       debug: false,
       homeDir: 'src',
       output: 'dist/$name.js',
       target : 'browser@es5',
-      hash: this.isProduction(),
+      hash: this.prod,
       useTypescriptCompiler: true,
       plugins: [
         [
           SassPlugin(),
           PostCSSPlugin(postCssConfig.plugins),
-          CSSResourcePlugin({
-            dist: 'dist',
-            resolve: (f) => `/${f}`,
-          }),
+          // CSSResourcePlugin({
+          //   dist: 'dist',
+          //   resolve: (f) => `/${f}`,
+          // }),
           CSSPlugin()
         ],
-        SVGPlugin(),
+        // SVGPlugin(),
+        // YAMLPlugin(),
         WebIndexPlugin({
           template : 'src/index.html',
         }),
         ReplacePlugin({
           'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
         }),
-        this.isProduction() && QuantumPlugin({
+        this.prod && QuantumPlugin({
           bakeApiIntoBundle: 'app',
           treeshake: true,
           uglify: true,
@@ -60,37 +72,48 @@ context(class {
   }
 
   createBundle(fuse) {
-    const app = fuse.bundle('app')
-    if (!this.isProduction()) {
-      app.watch()
-      app.hmr()
+    const bundle = fuse.bundle('app')
+    bundle.instructions(`> index.tsx`)
+
+    if (this.run && !this.prod) {
+      bundle.watch()
+      bundle.hmr()
     }
-    app.instructions(`> index.tsx`)
-    return app
+
+    return bundle
   }
 })
+
+///////////////////////////////////////////////////////////////////////////////
 
 task('clean', async ctx => {
   await src('dist').clean('dist').exec()
 })
 
 task('build', ['clean'], async ctx => {
-  const fuse = ctx.getConfig()
-  const port = await portfinder.getPortPromise()
-  fuse.dev({
-    fallback: 'index.html',
-    port: port,
-    open: true,
-  })
+  const fuse = ctx.getBundleConfig()
+
+  if (ctx.run) {
+    const port = await portfinder.getPortPromise()
+
+    fuse.dev({
+      fallback: 'index.html',
+      port: port,
+      open: true,
+    })
+  }
+
   ctx.createBundle(fuse)
-  await fuse.run()
+  fuse.run()
 })
 
-task('build:dev', async ctx => {
+task('run', async ctx => {
+  ctx.run = true
   exec('build')
 })
 
-task('build:prod', async ctx => {
-  process.env.NODE_ENV = 'production'
-  exec('build')
+task('default', async ctx => {
+  exec('run')
 })
+
+///////////////////////////////////////////////////////////////////////////////
